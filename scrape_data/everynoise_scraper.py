@@ -52,7 +52,7 @@ def scrape_everynoise_playlist(genre: str) -> Tuple[Optional[str], Optional[str]
         return None, f"Unexpected error: {str(e)}"
 
 
-def scrape_genres(genres: List[str], delay: float = 1.0) -> Dict:
+def scrape_genres(genres: List[str], delay: float = 0.0) -> Dict:
     """
     Scrape Spotify playlists for multiple genres
     
@@ -98,28 +98,67 @@ def scrape_genres(genres: List[str], delay: float = 1.0) -> Dict:
 def main():
     # List of genres to scrape
     genres = [
-        "pop",
-        "rock",
-        "jazz",
-        # "classical",
-        # "hiphop",
-        # "country",
-        # "blues",
-        # "reggae",
-        # "metal",
-        # "disco",
-        # "electronic",
-        # "folk",
-        # "indie",
-        # "punk",
-        # "soul",
-        # "funk",
-        # "rnb",
-        # "latin",
-        # "ambient",
-        # "techno"
-    ]
-    
+    "rock",
+    "classicrock",
+    "deeppunkrock",
+    "hardrock",
+    "glamrock",
+
+    "pop",
+    "mexicanpop",
+    "dancepop",
+    "boyband",
+    "kpop",
+
+    "powermetal",
+    "deathmetal",
+    "speedmetal",
+    "blackmetal",
+    "metal",
+
+    "country",
+    "countryrock",
+    "outlawcountry",
+    "countrypop",
+    "countryroad",
+
+    "house",
+    "bigroom",
+    "techno",
+    "drumandbass",
+    "dubstep",
+
+    "hiphop",
+    "rap",
+    "prap",
+    "poprap",
+    "gangsterrap",
+
+    "swing",
+    "bebop",
+    "dixieland",
+    "hardbop",
+    "bossanova",
+
+    "earlymodernclassical",
+    "renaissance",
+    "contemporaryclassical",
+    "medieval",
+    "modernchambermusic",
+
+    "reggaeton",
+    "urbanolatino",
+    "latinhiphop",
+    "salsachoke",
+    "dembow",
+
+    "rb",
+    "contemporaryrb",
+    "soul",
+    "alternativerb",
+    "neosoul"
+]
+
     # Scrape all genres
     results = scrape_genres(genres, delay=0.0)
     
