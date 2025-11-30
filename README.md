@@ -1,6 +1,6 @@
 # Music Genre Classification — GTZAN (MusicRecNet Baseline)
 
-This repository implements a baseline 2D CNN (MusicRecNet) trained on the GTZAN music-genre dataset using pre-generated mel-spectrogram images (from the Kaggle dataset). It reproduces the architecture from the paper and provides scripts for training, evaluation, feature extraction and visualization.
+This repository implements a baseline 2D CNN (MusicRecNet) trained on the GTZAN music-genre dataset using pre-generated mel-spectrogram images (from the Kaggle dataset). It reproduces the architecture from the paper and provides scripts for training, evaluation, feature extraction and visualization. Paper: Music genre classification and music recommendation by using deep learning, A. Elbir✉ and N. Aydin.
 
 ## Features
 - Train baseline MusicRecNet CNN
