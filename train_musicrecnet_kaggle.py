@@ -2,6 +2,7 @@
 import torch
 from torch.utils.data import DataLoader, random_split
 from gtzan_kaggle_dataset import GTZANKaggleImages
+from spotify_dataset import SpotifyImages
 from musicrecnet import MusicRecNet
 import matplotlib.pyplot as plt
 
@@ -12,7 +13,7 @@ def train_musicrecnet(root_dir, batch_size=64, epochs=50, device=None):
     if device is None:
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    dataset = GTZANKaggleImages(root_dir)
+    dataset = SpotifyImages(root_dir)
 
     total = len(dataset)
     train_len = int(0.8 * total)

@@ -3,12 +3,13 @@ import torch
 import numpy as np
 from torch.utils.data import DataLoader
 from gtzan_kaggle_dataset import GTZANKaggleImages, GENRES
+from spotify_dataset import SpotifyImages
 from musicrecnet import MusicRecNet
 
 def extract_dense2(root_dir, model_path="musicrecnet_best.pt"):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    dataset = GTZANKaggleImages(root_dir)
+    dataset = SpotifyImages(root_dir)
     loader = DataLoader(dataset, batch_size=64, shuffle=False)
 
     model = MusicRecNet().to(device)
