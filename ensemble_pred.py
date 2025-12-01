@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from math import pi
 from musicrecnet import MusicRecNet
-from gtzan_kaggle_dataset import GENRES
 from torchvision import transforms
 from PIL import Image
 
@@ -19,6 +18,12 @@ cnn.eval()
 
 # Load SVM
 svm = joblib.load("svm_dense2.joblib")
+
+# ADD this:
+GENRES = [
+    "Classical","Country","EDM","Hip Hop","Jazz",
+    "Latin","Metal","Pop","RnB","Rock"
+]
 
 # same transforms as training
 transform = transforms.Compose([
@@ -109,18 +114,35 @@ def plot_radar_chart(ens_probs):
 
 def predict(path, w_cnn=0.6, w_svm=0.4):
     img = Image.open(path).convert("RGB")
+
+    # ------------------------------
+    #  CROP to match training data
+    # ------------------------------
+    w, h = img.size
+    crop_left = 48
+    crop_bottom = 36
+
+    img = img.crop((
+        crop_left,
+        0,
+        w,
+        h - crop_bottom
+    ))
+
+    # Now apply same training transforms
     x = transform(img).unsqueeze(0).to(device)
 
-    # CNN forward
+    # CNN
     with torch.no_grad():
         logits, feats = cnn(x)
         cnn_probs = torch.softmax(logits, dim=1).cpu().numpy()[0]
 
-    # SVM forward
+    # SVM
     svm_probs = svm.predict_proba(feats.cpu().numpy())[0]
 
     # Ensemble
     ens_probs = w_cnn * cnn_probs + w_svm * svm_probs
+
 
     # Print distributions
     print("\n===== CNN SOFTMAX =====")
@@ -153,4 +175,4 @@ def predict(path, w_cnn=0.6, w_svm=0.4):
 
 
 if __name__ == "__main__":
-    predict("Data/images_original/pop/pop00000.png")
+    predict("Data/images_original/Pop/Pop1.png")
