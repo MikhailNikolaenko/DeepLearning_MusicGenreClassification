@@ -8,14 +8,14 @@ import matplotlib.pyplot as plt
 train_acc_hist = []
 val_acc_hist = []
 
-def train_musicrecnet(root_dir, batch_size=64, epochs=50, device=None):
+def train_musicrecnet(root_dir, batch_size=32, epochs=100, device=None):
     if device is None:
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     dataset = GTZANKaggleImages(root_dir)
 
     total = len(dataset)
-    train_len = int(0.8 * total)
+    train_len = int(0.6 * total)
     val_len = total - train_len
 
     train_set, val_set = random_split(
@@ -28,7 +28,7 @@ def train_musicrecnet(root_dir, batch_size=64, epochs=50, device=None):
 
     model = MusicRecNet().to(device)
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adadelta(model.parameters(), lr=1.0)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     best_val_acc = 0
 
@@ -42,6 +42,9 @@ def train_musicrecnet(root_dir, batch_size=64, epochs=50, device=None):
 
             optimizer.zero_grad()
             logits, _ = model(imgs)
+            
+            
+
             loss = criterion(logits, labels)
             loss.backward()
             optimizer.step()
@@ -94,7 +97,7 @@ def plot_curves(train_acc, val_acc):
 
 
 if __name__ == "__main__":
-    ROOT = "Data/images_original"
+    ROOT = "Data/images_original_2"
 
     model, val_loader, device = train_musicrecnet(ROOT)
     plot_curves(train_acc_hist, val_acc_hist)

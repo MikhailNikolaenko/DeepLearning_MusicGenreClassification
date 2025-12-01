@@ -6,8 +6,8 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 
 GENRES = [
-    "blues", "classical", "country", "disco", "hiphop",
-    "jazz", "metal", "pop", "reggae", "rock"
+    "blues", "classical", "country", "disco", "EDM", "hiphop",
+    "jazz", "latin", "metal", "pop", "reggae", "RnB", "rock"
 ]
 
 class GTZANKaggleImages(Dataset):
@@ -17,7 +17,7 @@ class GTZANKaggleImages(Dataset):
 
         self.transform = transforms.Compose([
             transforms.Grayscale(num_output_channels=1),
-            transforms.Resize((128,128)),
+            # transforms.Resize((216,144)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.5], std=[0.5]),
         ])
@@ -28,9 +28,10 @@ class GTZANKaggleImages(Dataset):
         for label_idx, genre in enumerate(GENRES):
             gdir = os.path.join(root_dir, genre)
             for fname in os.listdir(gdir):
-                if fname.endswith(".png") or fname.endswith(".jpg"):
-                    self.paths.append(os.path.join(gdir, fname))
-                    self.labels.append(label_idx)
+                if '00' not in fname:
+                    if fname.endswith(".png") or fname.endswith(".jpg"):
+                        self.paths.append(os.path.join(gdir, fname))
+                        self.labels.append(label_idx)
 
     def __len__(self):
         return len(self.paths)

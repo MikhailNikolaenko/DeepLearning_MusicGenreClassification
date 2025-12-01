@@ -7,10 +7,10 @@ from gtzan_kaggle_dataset import GTZANKaggleImages, GENRES
 from musicrecnet import MusicRecNet
 from torch.utils.data import DataLoader
 
-ROOT = "Data/images_original"
+ROOT = "Data/images_original_2"
 
 dataset = GTZANKaggleImages(ROOT)
-loader = DataLoader(dataset, batch_size=64, shuffle=False)
+loader = DataLoader(dataset, batch_size=32, shuffle=False)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
