@@ -1,77 +1,116 @@
-# Music Genre Classification — GTZAN (MusicRecNet Baseline)
+# Music Genre Classification — GTZAN & Spotify (MusicRecNet Baseline)
 
-This repository implements a baseline 2D CNN (MusicRecNet) trained on the GTZAN music-genre dataset using pre-generated mel-spectrogram images (from the Kaggle dataset). It reproduces the architecture from the paper and provides scripts for training, evaluation, feature extraction and visualization. Paper: Music genre classification and music recommendation by using deep learning, A. Elbir✉ and N. Aydin.
+This repository implements baseline models (2D CNN, LSTM, SVM) trained on GTZAN and Spotify music-genre datasets using pre-generated mel-spectrogram images. It reproduces the MusicRecNet architecture from the paper and provides scripts for training, evaluation, feature extraction, ensemble prediction, and visualization. Paper: Music genre classification and music recommendation by using deep learning, A. Elbir✉ and N. Aydin.
 
 ## Features
-- Train baseline MusicRecNet CNN
-- Plot training curves
-- Generate confusion matrix
+- Train MusicRecNet 2D CNN on GTZAN and Spotify datasets
+- Train LSTM on Spotify dataset
+- Train SVM classifier on extracted CNN features
+- Ensemble predictions across all three architectures
+- Generate confusion matrices for all models
 - Extract Dense_2 (128-d) embeddings
-- t-SNE visualization of embeddings
+- Visualizations: radar charts, probability heatmaps, training curves, four-panel probability plots, t-SNE embeddings
 
 ## Project structure
 ```
 project/
 │
+├── scrape_data/
+│   ├── everynoise_scraper.py
+│   └── download_playlists.py
+│
 ├── train_musicrecnet_kaggle.py
-├── extract_features_kaggle.py
+├── train_musicrecnet_spotify.py
+├── train_musicrecnetLSTM_spotify.py
+├── train_svm.py
+├── extract_features.py
+├── ensemble_pred.py
 ├── confusion_matrix_eval.py
 ├── tsne_visualization.py
-├── gtzan_kaggle_dataset.py
+│
 ├── musicrecnet.py
+└── musicrecnet_lstm.py
+│
+├── gtzan_kaggle_dataset.py
+└── spotify_dataset.py
 │
 └── Data/
     └── images_original/
          ├── blues/
          ├── classical/
          ├── country/
-         ├── ...
+         └── ...
 ```
 
 ## Requirements
 Install the required Python packages:
 ```bash
-pip install torch torchvision pillow numpy matplotlib seaborn scikit-learn tqdm
+pip install torch torchvision pillow numpy matplotlib seaborn scikit-learn tqdm joblib
 ```
 
 ## Usage
 
-### 1. Training
-Train the model:
+### 1. Data Acquisition
+For Spotify dataset, run the scraping scripts (GTZAN dataset images should already be present):
 ```bash
-python train_musicrecnet_kaggle.py
+python everynoise_scraper.py
+python download_playlists.py
 ```
-Outputs:
-- `musicrecnet_best.pt` — best model checkpoint
-- `training_curve.png` — training/validation loss & accuracy plot
 
-### 2. Generate confusion matrix
-After training, evaluate and save confusion matrix:
+### 2. Train 2D CNN
+Train MusicRecNet on Spotify data (or modify for GTZAN):
 ```bash
-python confusion_matrix_eval.py
+python train_musicrecnet_spotify.py
 ```
 Output:
-- `confusion_matrix.png`
+- `musicrecnet_best.pt`
+- `training_curve.png`
 
-### 3. Extract Dense_2 features
-Extract 128-d feature vectors from the Dense_2 layer:
+### 3. Train LSTM
+Train LSTM on Spotify dataset:
 ```bash
-python extract_features_kaggle.py
+python train_musicrecnetLSTM_spotify.py
+```
+Output:
+- `musicrecnet_lstm_best.pt`
+
+### 4. Extract CNN Features
+Extract 128-d Dense_2 embeddings for SVM training:
+```bash
+python extract_features.py
 ```
 Outputs:
 - `dense2_features.npy`
 - `dense2_labels.npy`
 
-### 4. t-SNE visualization
-Create a t-SNE plot from extracted Dense_2 features:
+### 5. Train SVM
+Train SVM classifier on extracted CNN features:
 ```bash
-python tsne_visualization.py
+python train_svm.py
 ```
 Output:
-- `tsne_dense2.png`
+- `svm_dense2.joblib`
+
+### 6. Ensemble Prediction
+Run ensemble predictions across all three architectures:
+```bash
+python ensemble_pred.py
+```
+Outputs:
+- `ensemble_radar.png`
+- `probability_heatmap.png`
+- `four_panel_probs.png`
+
+### 7. Generate Confusion Matrices
+Evaluate all four models and generate confusion matrices:
+```bash
+python confusion_matrix_eval.py
+```
+Output:
+- `confusion_matrices_all_4.png`
 
 ## Notes
-- All scripts assume the dataset is located at `Data/images_original/`. If your dataset path differs, update the path in the scripts.
-- The Kaggle GTZAN dataset included here already contains mel-spectrogram PNGs; no additional audio preprocessing is required.
-- Adjust hyperparameters in `train_musicrecnet_kaggle.py` as needed.
-
+- GTZAN dataset mel-spectrogram images must be present in `Data/images_original/`; no additional audio preprocessing required.
+- Spotify dataset requires running scraping scripts first to download playlist data.
+- Modify dataset paths in scripts if needed.
+- Adjust hyperparameters in training scripts as required.
