@@ -16,7 +16,7 @@ def train_svm():
         kernel='rbf',
         C=5,
         gamma='scale',
-        probability=True   # VERY IMPORTANT for softmax-like output
+        probability=True 
     )
 
     clf.fit(X_train, y_train)
