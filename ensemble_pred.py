@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from math import pi
 from musicrecnet import MusicRecNet
+from musicrecnet_lstm import MusicRecNetLSTM
 from torchvision import transforms
 from PIL import Image
 
@@ -15,6 +16,11 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 cnn = MusicRecNet().to(device)
 cnn.load_state_dict(torch.load("musicrecnet_best.pt"))
 cnn.eval()
+
+# Load LSTM-CNN hybrid
+lstm = MusicRecNetLSTM().to(device)
+lstm.load_state_dict(torch.load("musicrecnet_lstm_best.pt"))
+lstm.eval()
 
 # Load SVM
 svm = joblib.load("svm_dense2.joblib")
@@ -37,44 +43,50 @@ transform = transforms.Compose([
 # VISUALIZATION FUNCTIONS
 # -------------------------------------------------------
 
-def plot_triple_panel(cnn_probs, svm_probs, ens_probs):
+def plot_four_panel(cnn_probs, svm_probs, lstm_probs, ens_probs):
     plt.figure(figsize=(16,5))
 
     # CNN
-    plt.subplot(1,3,1)
+    plt.subplot(1,4,1)
     plt.bar(GENRES, cnn_probs, color="royalblue")
     plt.xticks(rotation=45, ha="right")
     plt.ylim(0,1)
     plt.title("CNN Probabilities")
 
     # SVM
-    plt.subplot(1,3,2)
+    plt.subplot(1,4,2)
     plt.bar(GENRES, svm_probs, color="darkorange")
     plt.xticks(rotation=45, ha="right")
     plt.ylim(0,1)
     plt.title("SVM Probabilities")
 
+    # LSTM
+    plt.subplot(1,4,3)
+    plt.bar(GENRES, lstm_probs, color="red")
+    plt.xticks(rotation=45, ha="right")
+    plt.title("CNN + LSTM")
+
     # Ensemble
-    plt.subplot(1,3,3)
+    plt.subplot(1,4,4)
     plt.bar(GENRES, ens_probs, color="seagreen")
     plt.xticks(rotation=45, ha="right")
     plt.ylim(0,1)
     plt.title("Ensemble Probabilities")
 
     plt.tight_layout()
-    plt.savefig("triple_panel_probs.png")
+    plt.savefig("four_panel_probs.png")
     plt.close()
 
 
-def plot_heatmap(cnn_probs, svm_probs, ens_probs):
-    data = np.vstack([cnn_probs, svm_probs, ens_probs])
+def plot_heatmap(cnn_probs, svm_probs, lstm_probs, ens_probs):
+    data = np.vstack([cnn_probs, svm_probs, lstm_probs, ens_probs])
 
     plt.figure(figsize=(8,4))
     plt.imshow(data, cmap="viridis", aspect="auto")
 
     plt.colorbar(label="Probability")
 
-    plt.yticks([0,1,2], ["CNN", "SVM", "Ensemble"])
+    plt.yticks([0,1,2,3], ["CNN", "SVM", "LSTM", "Ensemble"])
     plt.xticks(range(len(GENRES)), GENRES, rotation=45, ha="right")
     plt.title("Probability Heatmap")
 
@@ -112,7 +124,7 @@ def plot_radar_chart(ens_probs):
 # PREDICTION FUNCTION
 # -------------------------------------------------------
 
-def predict(path, w_cnn=0.6, w_svm=0.4):
+def predict(path, w_cnn=0.5, w_svm=0.3, w_lstm=0.2):
     img = Image.open(path).convert("RGB")
 
     # ------------------------------
@@ -140,9 +152,13 @@ def predict(path, w_cnn=0.6, w_svm=0.4):
     # SVM
     svm_probs = svm.predict_proba(feats.cpu().numpy())[0]
 
-    # Ensemble
-    ens_probs = w_cnn * cnn_probs + w_svm * svm_probs
+        # LSTM
+    with torch.no_grad():
+        logits_lstm, _ = lstm(x)
+        lstm_probs = torch.softmax(logits_lstm, dim=1).cpu().numpy()[0]
 
+    # Ensemble
+    ens_probs = w_cnn * cnn_probs + w_svm * svm_probs + w_lstm * lstm_probs
 
     # Print distributions
     print("\n===== CNN SOFTMAX =====")
@@ -153,17 +169,20 @@ def predict(path, w_cnn=0.6, w_svm=0.4):
     for g, p in zip(GENRES, svm_probs):
         print(f"{g:10s}: {p*100:.2f}%")
 
-    print("\n===== ENSEMBLE (CNN + SVM) =====")
+    print("\n===== LSTM =====")
+    for g,p in zip(GENRES, lstm_probs): print(f"{g:10s}: {p*100:.2f}%")
+
+    print("\n===== ENSEMBLE (CNN + SVM + LSTM) =====")
     for g, p in zip(GENRES, ens_probs):
         print(f"{g:10s}: {p*100:.2f}%")
 
     # ---- VISUALIZATIONS ----
-    plot_triple_panel(cnn_probs, svm_probs, ens_probs)
-    plot_heatmap(cnn_probs, svm_probs, ens_probs)
+    plot_four_panel(cnn_probs, svm_probs, lstm_probs, ens_probs)
+    plot_heatmap(cnn_probs, svm_probs, lstm_probs, ens_probs)
     plot_radar_chart(ens_probs)
 
     print("\nSaved visualizations:")
-    print("  triple_panel_probs.png")
+    print("  four_panel_probs.png")
     print("  probability_heatmap.png")
     print("  ensemble_radar.png\n")
 
@@ -171,6 +190,7 @@ def predict(path, w_cnn=0.6, w_svm=0.4):
     print("Predictions:")
     print("  CNN:       ", GENRES[np.argmax(cnn_probs)])
     print("  SVM:       ", GENRES[np.argmax(svm_probs)])
+    print("  LSTM:      ", GENRES[np.argmax(lstm_probs)])
     print("  Ensemble:  ", GENRES[np.argmax(ens_probs)])
 
 
