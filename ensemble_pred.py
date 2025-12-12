@@ -141,7 +141,7 @@ def predict(path, w_cnn=0.5, w_svm=0.3, w_lstm=0.2):
         h - crop_bottom
     ))
 
-    # Now apply same training transforms
+    # Apply same training transforms
     x = transform(img).unsqueeze(0).to(device)
 
     # CNN

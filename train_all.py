@@ -4,7 +4,6 @@ import subprocess
 def run(cmd):
     print(f"\n===== RUNNING: {cmd} =====\n")
     
-    # This prints training logs *live* in your console
     process = subprocess.Popen(
         cmd, 
         shell=True,
@@ -13,7 +12,6 @@ def run(cmd):
         text=True
     )
 
-    # Stream the logs line-by-line
     for line in process.stdout:
         print(line, end="")
 
