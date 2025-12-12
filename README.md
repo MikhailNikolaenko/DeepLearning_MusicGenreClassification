@@ -56,6 +56,7 @@ For Spotify dataset, run the scraping scripts (GTZAN dataset images should alrea
 python everynoise_scraper.py
 python download_playlists.py
 ```
+After scraping the Spotify dataset, run `MelSpectrogramMaker.m` in MATLAB to generate mel spectrogram images.
 
 ### 2. Train 2D CNN
 Train MusicRecNet on Spotify data (or modify for GTZAN):
